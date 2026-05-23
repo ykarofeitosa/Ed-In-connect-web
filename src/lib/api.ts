@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:3333";
+// const BASE_URL = "http://localhost:3333";
+const BASE_URL = "https://ed-in-connect-api-1.onrender.com"
 
 function getToken(): string | null {
   return localStorage.getItem("@edinconnect:token");
