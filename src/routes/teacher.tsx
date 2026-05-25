@@ -404,7 +404,7 @@ function RegisterStudentModal({
     <div>
       <label className="text-sm font-medium">E-mail *</label>
       <input type="email" value={guardianEmail} onChange={e => { setGuardianEmail(e.target.value); setError(null); }}
-        placeholder="responsavel@email.com"
+        placeholder="Ex: carlos@responsavel.com"
         className="mt-1.5 w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
     </div>
     <div>
