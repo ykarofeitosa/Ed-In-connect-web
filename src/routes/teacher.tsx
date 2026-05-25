@@ -222,27 +222,62 @@ function RegisterStudentModal({
   const [learningGoal, setLearningGoal] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // responsavel
+
+  const [addGuardian, setAddGuardian] = useState (false);
+  const [guardianName, setGuardianName] = useState ("");
+  const [guardianEmail, setGuardianEmail] = useState ("");
+  const [guardianPassword, setGuardianPassword] = useState ("");
+  const [loading, setLoading] = useState (false);
+ 
   const registerStudent = useRegisterStudent();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const validationError = validateStudentForm(name, email, password);
-    if (validationError) { setError(validationError); return; }
-    setError(null);
-    try {
-      await registerStudent.mutateAsync({
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password,
-        classId: classId || undefined,
-        inclusiveMode,
-        learningGoal: learningGoal.trim() || undefined,
-      });
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao cadastrar aluno.");
+  e.preventDefault();
+  const validationError = validateStudentForm(name, email, password);
+  if (validationError) { setError(validationError); return; }
+  if (addGuardian) {
+    if (guardianName.trim().length < 3) { setError("Nome do responsável deve ter pelo menos 3 caracteres."); return; }
+    if (!guardianEmail.includes("@")) { setError("E-mail do responsável inválido."); return; }
+    if (guardianPassword.length < 6) { setError("Senha do responsável deve ter pelo menos 6 caracteres."); return; }
+  }
+  setError(null);
+  setLoading(true);
+  try {
+    await registerStudent.mutateAsync({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+      classId: classId || undefined,
+      inclusiveMode,
+      learningGoal: learningGoal.trim() || undefined,
+    });
+
+    if (addGuardian) {
+      const students = await api.get<{ students: { id: string; user: { email: string } }[] }>("/students");
+      const student = students.students.find(s => s.user.email === email.trim().toLowerCase());
+      if (student) {
+        const guardianRes = await api.post<{ guardian: { id: string } }>("/guardians", {
+          name: guardianName.trim(),
+          email: guardianEmail.trim().toLowerCase(),
+          password: guardianPassword,
+        });
+        await api.post("/guardians/link", {
+          guardianId: guardianRes.guardian.id,
+          studentId: student.id,
+        });
+      }
     }
-  };
+
+    queryClient.invalidateQueries({ queryKey: ["students"] });
+    onClose();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Erro ao cadastrar.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -345,6 +380,42 @@ function RegisterStudentModal({
             </div>
           </div>
 
+          {/* Toggle responsável */}
+<div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30">
+  <button type="button" onClick={() => setAddGuardian(v => !v)}
+    className={`w-10 h-6 rounded-full transition-colors shrink-0 ${addGuardian ? "bg-primary" : "bg-muted-foreground/30"}`}>
+    <span className={`block w-4 h-4 rounded-full bg-white shadow transition-transform mx-1 ${addGuardian ? "translate-x-4" : "translate-x-0"}`} />
+  </button>
+  <div>
+    <div className="text-sm font-medium">Cadastrar responsável</div>
+    <div className="text-xs text-muted-foreground">Vincular um responsável a este aluno</div>
+  </div>
+</div>
+
+{addGuardian && (
+  <div className="space-y-3 p-4 rounded-xl border border-border bg-muted/20">
+    <p className="text-sm font-semibold text-primary">Dados do Responsável</p>
+    <div>
+      <label className="text-sm font-medium">Nome *</label>
+      <input value={guardianName} onChange={e => { setGuardianName(e.target.value); setError(null); }}
+        placeholder="Ex: Maria Silva"
+        className="mt-1.5 w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+    </div>
+    <div>
+      <label className="text-sm font-medium">E-mail *</label>
+      <input type="email" value={guardianEmail} onChange={e => { setGuardianEmail(e.target.value); setError(null); }}
+        placeholder="responsavel@email.com"
+        className="mt-1.5 w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+    </div>
+    <div>
+      <label className="text-sm font-medium">Senha *</label>
+      <input type="password" value={guardianPassword} onChange={e => { setGuardianPassword(e.target.value); setError(null); }}
+        placeholder="Mínimo 6 caracteres"
+        className="mt-1.5 w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+    </div>
+  </div>
+)}
+
           {error && (
             <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               {error}
@@ -361,10 +432,10 @@ function RegisterStudentModal({
             </button>
             <button
               type="submit"
-              disabled={registerStudent.isPending}
+              disabled={loading}
               className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {registerStudent.isPending
+              {loading
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Cadastrando...</>
                 : "Cadastrar aluno"}
             </button>
