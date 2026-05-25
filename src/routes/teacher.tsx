@@ -258,13 +258,13 @@ function RegisterStudentModal({
       const students = await api.get<{ students: { id: string; user: { email: string } }[] }>("/students");
       const student = students.students.find(s => s.user.email === email.trim().toLowerCase());
       if (student) {
-        const guardianRes = await api.post<{ guardian: { id: string } }>("/guardians", {
+        const guardianRes = await api.post<{ user: { guardian: { id: string } } }>("/guardians", {
           name: guardianName.trim(),
           email: guardianEmail.trim().toLowerCase(),
           password: guardianPassword,
         });
         await api.post("/guardians/link", {
-          guardianId: guardianRes.guardian.id,
+          guardianId: guardianRes.user.guardian.id,
           studentId: student.id,
         });
       }
