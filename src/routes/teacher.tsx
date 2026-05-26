@@ -379,19 +379,6 @@ function RegisterStudentModal({
               <div className="text-xs text-muted-foreground">Interface adaptada para o aluno</div>
             </div>
           </div>
-
-          {/* Toggle responsável */}
-<div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30">
-  <button type="button" onClick={() => setAddGuardian(v => !v)}
-    className={`w-10 h-6 rounded-full transition-colors shrink-0 ${addGuardian ? "bg-primary" : "bg-muted-foreground/30"}`}>
-    <span className={`block w-4 h-4 rounded-full bg-white shadow transition-transform mx-1 ${addGuardian ? "translate-x-4" : "translate-x-0"}`} />
-  </button>
-  <div>
-    <div className="text-sm font-medium">Cadastrar responsável</div>
-    <div className="text-xs text-muted-foreground">Vincular um responsável a este aluno</div>
-  </div>
-</div>
-
 {addGuardian && (
   <div className="space-y-3 p-4 rounded-xl border border-border bg-muted/20">
     <p className="text-sm font-semibold text-primary">Dados do Responsável</p>
