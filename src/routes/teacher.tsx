@@ -379,7 +379,7 @@ function RegisterStudentModal({
               <div className="text-xs text-muted-foreground">Interface adaptada para o aluno</div>
             </div>
           </div>
-(
+
   <div className="space-y-3 p-4 rounded-xl border border-border bg-muted/20">
     <p className="text-sm font-semibold text-primary">Dados do Responsável</p>
     <div>
@@ -401,7 +401,7 @@ function RegisterStudentModal({
         className="mt-1.5 w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
     </div>
   </div>
-)
+
 
           {error && (
             <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
