@@ -237,11 +237,11 @@ function RegisterStudentModal({
   e.preventDefault();
   const validationError = validateStudentForm(name, email, password);
   if (validationError) { setError(validationError); return; }
-  if (addGuardian) {
+  
     if (guardianName.trim().length < 3) { setError("Nome do responsável deve ter pelo menos 3 caracteres."); return; }
     if (!guardianEmail.includes("@")) { setError("E-mail do responsável inválido."); return; }
     if (guardianPassword.length < 6) { setError("Senha do responsável deve ter pelo menos 6 caracteres."); return; }
-  }
+  
   setError(null);
   setLoading(true);
   try {
@@ -254,7 +254,7 @@ function RegisterStudentModal({
       learningGoal: learningGoal.trim() || undefined,
     });
 
-    if (addGuardian) {
+    if (guardianName.trim()) {
       const students = await api.get<{ students: { id: string; user: { email: string } }[] }>("/students");
       const student = students.students.find(s => s.user.email === email.trim().toLowerCase());
       if (student) {
@@ -379,7 +379,7 @@ function RegisterStudentModal({
               <div className="text-xs text-muted-foreground">Interface adaptada para o aluno</div>
             </div>
           </div>
-{addGuardian && (
+(
   <div className="space-y-3 p-4 rounded-xl border border-border bg-muted/20">
     <p className="text-sm font-semibold text-primary">Dados do Responsável</p>
     <div>
@@ -401,7 +401,7 @@ function RegisterStudentModal({
         className="mt-1.5 w-full px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
     </div>
   </div>
-)}
+)
 
           {error && (
             <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
